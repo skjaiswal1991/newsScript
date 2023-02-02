@@ -11,4 +11,4 @@
 #npm install pm2 -g
 # latest pm2
 #pm2 update
-sudo rm -rf /var/www/html/newsScript
+#sudo rm -rf /var/www/html/newsScript
