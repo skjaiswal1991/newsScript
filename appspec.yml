@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /var/www/html/Project-Name
+    destination: /var/www/html/newsScript
 hooks:
   BeforeInstall:
     - location: scripts/install_dependencies.sh
