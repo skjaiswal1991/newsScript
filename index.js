@@ -198,14 +198,11 @@ const getNewsFilterForNews18 = (detailUrl, publishname, publishDate, categoryID)
             const data = {
                 postslug, publishname, publishDate, categoryID, pageurl, title, image, description, metakeyword, metadescription, metatitle
             }
-            console.log("data", data);
             postModule.addNewPosts(data, (err, response) => {
                 if (err) reject(err)
                 resolve(response)
             })
         })
-
-
     });
 }
 
@@ -236,8 +233,6 @@ const getNewsFilter = (detailUrl, publishname, publishDate, categoryID) => {
                 resolve(response)
             })
         })
-
-
     });
 }
 
