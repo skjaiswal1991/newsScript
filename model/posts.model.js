@@ -10,9 +10,9 @@ const savePost = (data, callback) => {
 }
 const getPost = (callback, object = {}, option = false, filter = {}, skip = 0, limit = 0) => {
     if (option) {
-        postschema.find(object, filter, callback).skip(skip).limit(limit);
+        postschema.find(object, filter, callback).skip(skip).limit(limit).sort('-publishDate');
     } else {
-        postschema.find({}, callback);
+        postschema.find({}, callback).sort('-publishDate');
     }
 }
 
@@ -30,8 +30,9 @@ const aggregateData = (callback) => {
                 as: 'category'
             }
         }
-    ]).exec(callback);
+    ]).sort('-publishDate').exec(callback);
 
 }
+
 
 module.exports = { savePost, getPost, aggregateData }

@@ -14,7 +14,9 @@ global.appRoot = path.resolve(__dirname);
 const postModule = require('./module/posts.module')
 const categoyModule = require('./module/categorys.module')
 
-
+app.use(cors({
+    origin: '*'
+}));
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.urlencoded());
 
@@ -35,25 +37,25 @@ app.get('/speech', (req, res) => {
 app.get('/playaudio/:slug', function (req, res) {
     console.log("req", req)
     try {
-        console.log("playaudio");
-        if (req.params && req.params.slug) {
-            var filepath = path.join(appRoot + '/audio', `${req.params.slug}.mp3`);
-            // console.log("filepath++", filepath);
-            // console.log(fs.existsSync(filepath));
-            postModule.getPostDescription(req.params.slug, (err, data) => {
+        // console.log("playaudio");
+        // if (req.params && req.params.slug) {
+        //     var filepath = path.join(appRoot + '/audio', `${req.params.slug}.mp3`);
+        //     // console.log("filepath++", filepath);
+        //     // console.log(fs.existsSync(filepath));
+        //     postModule.getPostDescription(req.params.slug, (err, data) => {
 
-                if (err) throw new Error(err);
-                console.log("descriptui", data)
-                if (data && data[0] && data[0].description) {
-                    let desc = data[0].description.replace(/\n/gi, ``);
-                    res.set({ 'Content-Type': 'audio/mpeg' });
+        //         if (err) throw new Error(err);
+        //         console.log("descriptui", data)
+        //         if (data && data[0] && data[0].description) {
+        //             let desc = data[0].description.replace(/\n/gi, ``);
+        //             res.set({ 'Content-Type': 'audio/mpeg' });
 
-                    gtts.stream(desc).pipe(res);
-                }
+        //             gtts.stream(desc).pipe(res);
+        //         }
 
-            })
+        //     })
 
-        }
+        // }
 
     } catch (err) {
         res.status(400).send(err)
@@ -65,29 +67,29 @@ app.get('/playaudio/:slug', function (req, res) {
 app.post('/playaudio', function (req, res) {
     console.log(req.body.slug)
     try {
-        console.log("playaudio");
-        if (req.body && req.body.slug) {
-            var filepath = path.join(appRoot + '/audio', `${req.body.slug}.mp3`);
-            console.log("filepath++", filepath);
-            console.log(fs.existsSync(filepath));
-            // if (!fs.existsSync(filepath)) {
-            postModule.getPostDescription(req.body.slug, async (err, data) => {
-                if (err) throw new Error(err);
-                console.log("descriptui", data)
-                if (data && data[0] && data[0].description) {
-                    let desc = data[0].description.replace(/\n/gi, ``);
-                    await gtts.save(filepath, desc, function (err, data) {
-                        if (err) res.status(400).send(err)
-                        res.status(200).send(data)
+        // console.log("playaudio");
+        // if (req.body && req.body.slug) {
+        //     var filepath = path.join(appRoot + '/audio', `${req.body.slug}.mp3`);
+        //     console.log("filepath++", filepath);
+        //     console.log(fs.existsSync(filepath));
+        //     // if (!fs.existsSync(filepath)) {
+        //     postModule.getPostDescription(req.body.slug, async (err, data) => {
+        //         if (err) throw new Error(err);
+        //         console.log("descriptui", data)
+        //         if (data && data[0] && data[0].description) {
+        //             let desc = data[0].description.replace(/\n/gi, ``);
+        //             await gtts.save(filepath, desc, function (err, data) {
+        //                 if (err) res.status(400).send(err)
+        //                 res.status(200).send(data)
 
-                    })
-                }
+        //             })
+        //         }
 
-            })
-            // } else {
-            //     res.status(200).send(filepath)
-            // }
-        }
+        //     })
+        //     // } else {
+        //     //     res.status(200).send(filepath)
+        //     // }
+        // }
 
     } catch (err) {
         res.status(400).send(err)
@@ -284,21 +286,21 @@ app.post("/addnews", (req, res) => {
 
 
             categoyModule.getCategoryByslug(req.body.categoryslug, (err, result) => {
-                if (err) return err
-                let categoryID = result[0]._id.toString();
                 try {
-                    let addNews = []
-                    console.log(data.length)
-                    data.map(async (n, i) => {
+                    if (err) return res.status(400).send(err)
+                    if (result) {
+                        let categoryID = result[0]._id.toString();
+                        let addNews = []
+                        console.log(data.length)
+                        data.map(async (n, i) => {
+                            let status = await getNewsFilter(req.body.baseUrl + n, req.body.publisher, new Date(), categoryID)
+                            console.log(status);
 
-                        let status = await getNewsFilter(req.body.baseUrl + n, req.body.publisher, new Date(), categoryID)
-                        console.log(status);
-
-
-                    })
-                    res.status(200).send(addNews)
-                } catch (err) {
-                    res.status(400).send(err)
+                        })
+                        res.status(200).send(addNews)
+                    }
+                } catch (error) {
+                    res.status(400).send(error)
                 }
             })
 
@@ -312,6 +314,23 @@ app.post("/addnews", (req, res) => {
     }
 
 })
+
+/*
+*  getpostby categoryID
+*/
+app.post('/postbycategory', postModule.getPostByCategoryID);
+
+/*
+*  getpostby categoryID
+*/
+app.post('/postbycategoryname', postModule.getPostByCategorySlug);
+
+
+/*
+*  getall category list
+*/
+app.get('/category', categoyModule.getCategoryList);
+
 app.listen(process.env.PORT_NUMBER, () => {
     console.log("port is running ", process.env.PORT_NUMBER)
 })

@@ -1,7 +1,8 @@
+const { isValidObjectId } = require('mongoose');
 var path = require('path')
 var gtts = require('node-gtts')('hi');
 const postmodel = require('./../model/posts.model')
-
+const categoymodel = require('./../model/category.model')
 const addNewPosts = (data, callback) => {
 
     // console.log("data", data.rss.channel[0].item);
@@ -59,9 +60,7 @@ const getPostData = (req, res) => {
     })
 }
 
-const getPostByCategory = (callback, categoryId) => {
-    postmodel.getPost(callback, {});
-}
+
 const getAllPostTitle = async (req, res) => {
     postmodel.getPost((err, result) => {
         if (err) res.status(400).send(err)
@@ -115,4 +114,66 @@ const getPostDescription = (postslug, callback) => {
 
 }
 
-module.exports = { addNewPosts, getPostData, getPostByslug, getPostDescription, getPost, getAllPostTitle }
+/*
+*   get post by category ID
+*/
+const getPostByCategoryID = (req, res) => {
+    try {
+        const ID = req.body.categoryID;
+        const start = req.body.start || 0
+        const end = req.body.end || 20
+
+        categoymodel.getCategory((eror, cat) => {
+            let categoryID = cat && cat.length > 0 && cat[0]._id.toString();
+
+            if (categoryID) {
+                console.log(categoryID)
+                postmodel.getPost((err, result) => {
+                    if (err) res.status(400).send(err)
+                    let gata = []
+                    result.forEach(element => {
+                        gata.push({ ...element._doc, category: cat })
+                    });
+                    res.status(200).send(gata)
+                }, { categoryID: categoryID }, true, { title: 1, description: 1, postslug: 1, image: 1, publishDate: 1 }, start, end)
+            }
+        }, { _id: ID }, true)
+    } catch (err) {
+        res.status(400).send(err)
+    }
+
+}
+
+/*
+*   get post by category slug
+*/
+
+const getPostByCategorySlug = (req, res) => {
+    try {
+        const categorySlug = req.body.categoryslug;
+        const start = req.body.start || 0
+        const end = req.body.end || 20
+
+        categoymodel.getCategory((eror, cat) => {
+            let categoryID = cat && cat.length > 0 && cat[0]._id.toString();
+
+            if (categoryID) {
+                console.log(categoryID)
+                postmodel.getPost((err, result) => {
+                    if (err) res.status(400).send(err)
+                    let gata = []
+                    result.forEach(element => {
+                        gata.push({ ...element._doc, category: cat })
+                    });
+                    res.status(200).send(gata)
+                }, { categoryID: categoryID }, true, { title: 1, description: 1, postslug: 1, image: 1, publishDate: 1 }, start, end)
+            }
+        }, { categorySlug }, true)
+    } catch (err) {
+        res.status(400).send(err)
+    }
+
+}
+
+
+module.exports = { addNewPosts, getPostByCategoryID, getPostByCategorySlug, getPostData, getPostByslug, getPostDescription, getPost, getAllPostTitle }

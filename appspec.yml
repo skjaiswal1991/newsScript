@@ -3,8 +3,6 @@ os: linux
 files:
   - source: /
     destination: /var/www/html/newsScript
-    overwrite: true
-file_exists_behavior: OVERWRITE
 hooks:
   BeforeInstall:
     - location: scripts/install_dependencies.sh
